@@ -27,7 +27,11 @@ function tellNextWord() {
     //    console.log("Last token was '" + lastToken + '", scheduling next word');
     //    setTimeout(tellNextWord, 1000);
     //}
-    setTimeout(tellNextWord, 1000);
+    if (decision.options.length == 1) {
+        setTimeout(tellNextWord, 500);
+    } else {
+        setTimeout(tellNextWord, 1000);
+    }
 }
 
 // Add a new word to the animation area. Remove old words as needed.
