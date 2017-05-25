@@ -1,3 +1,7 @@
+body {
+    font-size: 4vmin;
+}
+
 .seamless {
     margin: 0;
     padding: 0;
@@ -59,3 +63,4 @@
     max-width: 95%;
     padding: 10px;
 }
+
