@@ -38,12 +38,17 @@ function makeAnimationElement(decision) {
 function animateDecision(decision, anchor) {
     // create all the elements for the options
     var optionElems = [];
+    optionElems.push(createDecisionOptionElem(decision.taken));
+    optionElems[0].taken = true;
     for (var i=0; i < decision.options.length; i++) {
+        if (decision.options[i] == decision.taken) {
+            continue;
+        }
         if (optionElems.length >= 7) {
             break;
         }
         var elem = createDecisionOptionElem(decision.options[i]);
-        elem.taken = decision.taken === decision.options[i]
+        elem.taken = false;
         optionElems.push(elem);
     }
     shuffle(optionElems);
