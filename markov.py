@@ -1,8 +1,10 @@
+import argparse
 from collections import defaultdict, Counter, deque
 import random
 import json
 import time
 from tqdm import tqdm
+import wikipedia
 
 
 class MarkovModel(object):
@@ -111,34 +113,74 @@ def eat_newline(story):
     return '\n'
 
 
-def main():
+def load_story(filenames):
+    stories = []
+    for filename in filenames:
+        with open(filename) as fp:
+            stories.append(fp.read())
+    return '\n'.join(stories)
+
+
+def remove_single_newlines(story):
+    paragraphs = [[]]
+    for line in story.splitlines():
+        if len(line.strip()) == 0:
+            paragraphs.append([])
+        else:
+            paragraphs[-1].append(line)
+    return '\n'.join(' '.join(x for x in p) for p in paragraphs)
+
+
+def load_wikipedia(num_articles):
+    lines = []
+    while num_articles > 0:
+        chunk = min(10, num_articles)
+        num_articles -= 10
+        for article in wikipedia.random(chunk):
+            try:
+                page = wikipedia.page(article)
+            except wikipedia.DisambiguationError as ex:
+                page = wikipedia.page(ex.args[1][0])
+            print(article)
+            lines.extend(x for x in page.content.splitlines() if not x.startswith('==') and len(x) > 0)
+    return '\n'.join(lines)
+
+
+def main(args):
     model = MarkovModel()
-    with open('story.txt') as fp:
-        story = fp.read()
+
+    if args.mode == 'txt':
+        story = load_story(args.txt)
+    elif args.mode == 'wikipedia':
+        story = load_wikipedia(100)
+    else:
+        raise ValueError("invalid mode {}".format(args.mode))
+
+    if args.mdnl:
+        story = remove_single_newlines(story)
 
     tokens = list(tqdm(tokenize_story(story), desc="tokenizing"))
-    #token_to_id = {t: i for i, t in enumerate(tokens)}
-    #id_to_token = {i: t for t, i in token_to_id.items()}
-
-    #tokens = [token_to_id[t] for t in tokens]
-
-    for state, followup in tqdm(iter_states(tokens, 3, start_state=tuple('\n'), end_marker=tuple()), desc="building model"):
+    for state, followup in tqdm(iter_states(tokens, 3, start_state=tuple('\n'), end_marker=()), desc="building model"):
         model.add_sample(state, followup)
 
     print("Saving Model...")
     with open("model.json", "w") as fp:
         fp.write(model.to_json())
-    #with open("tokens.json", "w") as fp:
-    #    fp.write(json.dumps(id_to_token))
 
     print("Generating Story:")
     for token in model.iter_chain(tuple('\n')):
-    #    token = id_to_token[token]
         if not ispunctuation(token):
             print(" ", end="")
         print(token, end="", flush=True)
         time.sleep(0.2)
 
 
+def parse_args():
+    ap = argparse.ArgumentParser()
+    ap.add_argument('mode', choices=['txt', 'wikipedia'])
+    ap.add_argument('--mdnl', action='store_true', help='Markdown-style newlines (ignore single newlines)')
+    ap.add_argument('--txt', action='append')
+    return ap.parse_args()
+
 if __name__ == '__main__':
-    main()
+    main(parse_args())

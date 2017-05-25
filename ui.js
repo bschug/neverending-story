@@ -1,7 +1,14 @@
-function tellStory() {
+function getStoryUrl() {
+    if (window.location.hash.length > 1) {
+        return window.location.hash.substr(1) + '.json';
+    }
+    return "model.json";
+}
+
+function tellStory(modelUrl) {
     window.storyModel = new MarkovModel();
 
-    $.getJSON("model.json", function(data) {
+    $.getJSON(modelUrl, function(data) {
         window.storyModel.states = data;
         window.storyModel.startIteration();
         tellNextWord();
