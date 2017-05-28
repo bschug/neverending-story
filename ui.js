@@ -1,6 +1,6 @@
 function getStoryUrl() {
     if (window.location.hash.length > 1) {
-        return window.location.hash.substr(1) + '.json';
+        return 'models/' + window.location.hash.substr(1) + '.json';
     }
     return "model.json";
 }

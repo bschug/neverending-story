@@ -117,7 +117,10 @@ def load_story(filenames):
     stories = []
     for filename in filenames:
         with open(filename) as fp:
-            stories.append(fp.read())
+            story = fp.read()
+            if filename.endswith('.ftxt'):
+                story = remove_single_newlines(story)
+            stories.append(story)
     return '\n'.join(stories)
 
 
@@ -156,9 +159,6 @@ def main(args):
     else:
         raise ValueError("invalid mode {}".format(args.mode))
 
-    if args.mdnl:
-        story = remove_single_newlines(story)
-
     tokens = list(tqdm(tokenize_story(story), desc="tokenizing"))
     for state, followup in tqdm(iter_states(tokens, 3, start_state=tuple('\n'), end_marker=()), desc="building model"):
         model.add_sample(state, followup)
@@ -172,13 +172,12 @@ def main(args):
         if not ispunctuation(token):
             print(" ", end="")
         print(token, end="", flush=True)
-        time.sleep(0.2)
+        time.sleep(0.05)
 
 
 def parse_args():
     ap = argparse.ArgumentParser()
     ap.add_argument('mode', choices=['txt', 'wikipedia'])
-    ap.add_argument('--mdnl', action='store_true', help='Markdown-style newlines (ignore single newlines)')
     ap.add_argument('--txt', action='append')
     return ap.parse_args()
 
