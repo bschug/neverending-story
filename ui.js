@@ -1,18 +1,39 @@
 function getStoryUrl() {
     if (window.location.hash.length > 1) {
-        return window.location.hash.substr(1) + '.json';
+        return window.location.hash.substr(1) + '.bz2';
     }
-    return "model.json";
+    return "model.bz2";
+}
+
+function loadCompressedJSON(url, callback) {
+    console.log("Loading compressed JSON from " + url);
+    var xhr = new XMLHttpRequest();
+    xhr.open('GET', url, true);
+    xhr.responseType = 'arraybuffer';
+    xhr.send();
+    xhr.onload = function() {
+        console.log("Decompressing...");
+        var compressed = new Uint8Array(xhr.response);
+        console.log("Parsing JSON...")
+        var json = bzip2.simple(bzip2.array(compressed));
+        console.log("Done.")
+        callback(JSON.parse(json));
+    }
+}
+
+function loadModel(modelUrl, callback) {
+    console.log("loading model " + modelUrl + "...");
+    loadCompressedJSON(modelUrl, function(states) {
+        console.log("model loaded successfully");
+        window.storyModel.states = states;
+        window.storyModel.startIteration();
+        callback();
+    });
 }
 
 function tellStory(modelUrl) {
     window.storyModel = new MarkovModel();
-
-    $.getJSON(modelUrl, function(data) {
-        window.storyModel.states = data;
-        window.storyModel.startIteration();
-        tellNextWord();
-    })
+    loadModel(modelUrl, tellNextWord);
 }
 
 function tellNextWord() {
