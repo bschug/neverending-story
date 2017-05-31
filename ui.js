@@ -118,7 +118,7 @@ function animateDecision(decision, anchor) {
 function addToStory(token) {
     var story = $("#thestory > p:last-child")
     var storyContainer = $("#thestory");
-    var wasAtBottom = storyContainer.prop('scrollHeight') === storyContainer.scrollTop() + storyContainer.prop('clientHeight');
+    var wasAtBottom = storyContainer.prop('scrollHeight') < storyContainer.scrollTop() + storyContainer.prop('clientHeight') + 5;
 
     if (token === '\n') {
         $('<p></p>').appendTo("#thestory")
