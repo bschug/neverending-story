@@ -2,6 +2,42 @@ body {
     font-size: 2.5vmin;
 }
 
+#loading {
+    position:absolute;
+    width: 100vw;
+    height: 100vh;
+}
+#loading > div {
+    display:inline-block;
+    text-align:center;
+    width:100%;
+    font-size: 5vw;
+}
+#loading > div::before {
+    content:'';
+    display:inline-block;
+    height:100%;
+    vertical-align:middle;
+    width:0px;
+}
+
+.pulsating {
+    -webkit-animation: pulsate 2s ease-out;
+    -webkit-animation-iteration-count: infinite;
+    opacity: 0.5;
+}
+@-webkit-keyframes pulsate {
+    0% {
+        opacity: 0.5;
+    }
+    50% {
+        opacity: 1.0;
+    }
+    100% {
+        opacity: 0.5;
+    }
+}
+
 .seamless {
     margin: 0;
     padding: 0;

@@ -33,7 +33,10 @@ function loadModel(modelUrl, callback) {
 
 function tellStory(modelUrl) {
     window.storyModel = new MarkovModel();
-    loadModel(modelUrl, tellNextWord);
+    loadModel(modelUrl, function() {
+        $("#loading").remove();
+        tellNextWord();
+    });
 }
 
 function tellNextWord() {
