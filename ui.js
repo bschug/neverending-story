@@ -28,7 +28,7 @@ function tellNextWord() {
     //    setTimeout(tellNextWord, 1000);
     //}
     if (decision.options.length == 1) {
-        setTimeout(tellNextWord, 500);
+        setTimeout(tellNextWord, 400);
     } else {
         setTimeout(tellNextWord, 1000);
     }
