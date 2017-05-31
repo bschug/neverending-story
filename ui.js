@@ -117,12 +117,21 @@ function animateDecision(decision, anchor) {
 
 function addToStory(token) {
     var story = $("#thestory > p:last-child")
+    var storyContainer = $("#thestory");
+    var wasAtBottom = storyContainer.prop('scrollHeight') === storyContainer.scrollTop() + storyContainer.prop('clientHeight');
+
     if (token === '\n') {
         $('<p></p>').appendTo("#thestory")
     } else if (isPunctuation(token)) {
         story.text(story.text() + token)
     } else {
         story.text(story.text() + " " + token)
+    }
+
+    if (wasAtBottom) {
+        storyContainer.scrollTop(storyContainer.prop('scrollHeight'));
+    } else {
+        console.log("was not at bottom, not autoscrolling: ", storyContainer.prop('scrollHeight'), " vs. ", storyContainer.scrollTop() + storyContainer.prop('clientHeight'));
     }
 }
 
