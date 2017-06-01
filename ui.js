@@ -1,18 +1,42 @@
 function getStoryUrl() {
     if (window.location.hash.length > 1) {
-        return 'models/' + window.location.hash.substr(1) + '.json';
+        return 'models/' + window.location.hash.substr(1) + '.bz2';
     }
-    return "model.json";
+    return "model.bz2";
+}
+
+function loadCompressedJSON(url, callback) {
+    console.log("Loading compressed JSON from " + url);
+    var xhr = new XMLHttpRequest();
+    xhr.open('GET', url, true);
+    xhr.responseType = 'arraybuffer';
+    xhr.send();
+    xhr.onload = function() {
+        console.log("Decompressing...");
+        var compressed = new Uint8Array(xhr.response);
+        console.log("Parsing JSON...")
+        var json = bzip2.simple(bzip2.array(compressed));
+        console.log("Done.")
+        callback(JSON.parse(json));
+    }
+}
+
+function loadModel(modelUrl, callback) {
+    console.log("loading model " + modelUrl + "...");
+    loadCompressedJSON(modelUrl, function(states) {
+        console.log("model loaded successfully");
+        window.storyModel.states = states;
+        window.storyModel.startIteration();
+        callback();
+    });
 }
 
 function tellStory(modelUrl) {
     window.storyModel = new MarkovModel();
-
-    $.getJSON(modelUrl, function(data) {
-        window.storyModel.states = data;
-        window.storyModel.startIteration();
+    loadModel(modelUrl, function() {
+        $("#loading").remove();
         tellNextWord();
-    })
+    });
 }
 
 function tellNextWord() {
@@ -28,7 +52,7 @@ function tellNextWord() {
     //    setTimeout(tellNextWord, 1000);
     //}
     if (decision.options.length == 1) {
-        setTimeout(tellNextWord, 500);
+        setTimeout(tellNextWord, 400);
     } else {
         setTimeout(tellNextWord, 1000);
     }
@@ -93,12 +117,21 @@ function animateDecision(decision, anchor) {
 
 function addToStory(token) {
     var story = $("#thestory > p:last-child")
+    var storyContainer = $("#thestory");
+    var wasAtBottom = storyContainer.prop('scrollHeight') < storyContainer.scrollTop() + storyContainer.prop('clientHeight') + 5;
+
     if (token === '\n') {
         $('<p></p>').appendTo("#thestory")
     } else if (isPunctuation(token)) {
         story.text(story.text() + token)
     } else {
         story.text(story.text() + " " + token)
+    }
+
+    if (wasAtBottom) {
+        storyContainer.scrollTop(storyContainer.prop('scrollHeight'));
+    } else {
+        console.log("was not at bottom, not autoscrolling: ", storyContainer.prop('scrollHeight'), " vs. ", storyContainer.scrollTop() + storyContainer.prop('clientHeight'));
     }
 }
 
