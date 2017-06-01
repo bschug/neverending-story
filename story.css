@@ -103,3 +103,9 @@ body {
     overflow-y: scroll;
 }
 
+#textToSpeech {
+    position:absolute;
+    bottom: 0;
+    right: 0;
+    opacity: 0.5;
+}

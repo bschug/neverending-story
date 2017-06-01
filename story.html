@@ -14,7 +14,7 @@
 </script>
 </head>
 </head>
-<body style="height:100%" onload="tellStory(getStoryUrl())">
+<body style="height:100%" onload="tellStory(getStoryUrl())" onclick="nextVoice()">
 	<div id="fb-root"></div>
 	<script>(function(d, s, id) {
 	  var js, fjs = d.getElementsByTagName(s)[0];
@@ -42,5 +42,7 @@
         </div>
 		<div id="thestory"></div>
 	</div>
+
+	<img id="textToSpeech" src="voice.png" alt="text-to-speech" onclick="toggleTextToSpeech()"/>
 </body>
 </html>

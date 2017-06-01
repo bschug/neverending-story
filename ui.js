@@ -2,7 +2,7 @@ function getStoryUrl() {
     if (window.location.hash.length > 1) {
         return 'models/' + window.location.hash.substr(1) + '.bz2';
     }
-    return "model.bz2";
+    return "models/model.bz2";
 }
 
 function loadCompressedJSON(url, callback) {
@@ -18,6 +18,10 @@ function loadCompressedJSON(url, callback) {
         var json = bzip2.simple(bzip2.array(compressed));
         console.log("Done.")
         callback(JSON.parse(json));
+    }
+    xhr.onerror = function(error) {
+        console.log("Failed to load " + url);
+        console.log(error);
     }
 }
 
@@ -128,11 +132,42 @@ function addToStory(token) {
         story.text(story.text() + " " + token)
     }
 
+    say(token);
+
     if (wasAtBottom) {
         storyContainer.scrollTop(storyContainer.prop('scrollHeight'));
     } else {
         console.log("was not at bottom, not autoscrolling: ", storyContainer.prop('scrollHeight'), " vs. ", storyContainer.scrollTop() + storyContainer.prop('clientHeight'));
     }
+}
+
+var isTextToSpeechEnabled = false;
+function toggleTextToSpeech() {
+    if (isTextToSpeechEnabled) {
+        $("#textToSpeech").fadeTo(0, 0.5);
+        isTextToSpeechEnabled = false;
+    } else {
+        $("#textToSpeech").fadeTo(0, 1);
+        isTextToSpeechEnabled = true;
+    }
+}
+
+var textToSpeechBuffer = "";
+function say(word) {
+    if (!isTextToSpeechEnabled) {
+        return;
+    }
+
+    textToSpeechBuffer += " " + word;
+    if (!(isPunctuation(word) || word.indexOf("\n") >= 0 || textToSpeechBuffer.length > 50)) {
+        return;
+    }
+
+    if ('speechSynthesis' in window) {
+        var msg = new SpeechSynthesisUtterance(textToSpeechBuffer);
+        window.speechSynthesis.speak(msg);
+    }
+    textToSpeechBuffer = "";
 }
 
 function createDecisionOptionElem(tokens) {
